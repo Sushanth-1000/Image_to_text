@@ -22,13 +22,11 @@ interface FileUploaderProps {
 
 const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processImage = async (file: File) => {
     try {
       setIsProcessing(true);
-      setProgress(0);
       const worker = await createWorker();
       await worker.loadLanguage('eng');
       await worker.initialize('eng', OEM.LSTM_ONLY);
@@ -43,7 +41,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
       onResult('Error processing image. Please try again.');
     } finally {
       setIsProcessing(false);
-      setProgress(0);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

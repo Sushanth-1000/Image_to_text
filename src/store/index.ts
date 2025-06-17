@@ -8,14 +8,14 @@ interface AppState {
   setError: (error: string | null) => void;
 }
 
-export const useAppStore = create<AppState>()(
+export const useStore = create<AppState>()(
   devtools(
     persist(
       (set) => ({
         isLoading: false,
         error: null,
-        setLoading: (loading) => set({ isLoading: loading }),
-        setError: (error) => set({ error }),
+        setLoading: (loading: boolean) => set({ isLoading: loading }),
+        setError: (error: string | null) => set({ error }),
       }),
       {
         name: 'app-storage',
