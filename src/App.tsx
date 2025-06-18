@@ -17,6 +17,15 @@ const theme = createTheme({
       paper: '#ffffff',
     },
   },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: '#f5f5f5',
+        },
+      },
+    },
+  },
 });
 
 function App() {
@@ -34,7 +43,8 @@ function App() {
           bgcolor: 'background.paper',
           borderRadius: 2,
           p: 4,
-          boxShadow: 1
+          boxShadow: 1,
+          minHeight: '100vh'
         }}>
           <Typography variant="h3" component="h1" gutterBottom align="center" color="primary">
             OCR Web App

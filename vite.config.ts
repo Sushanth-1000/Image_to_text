@@ -7,5 +7,5 @@ export default defineConfig({
     port: 3000,
     open: true
   },
-  base: '/ocr-app-new/'
+  base: '/Image_to_text/'
 }) 

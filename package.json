@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://your-github-username.github.io/ocr-app-new",
+  "homepage": "https://sushanth-1000.github.io/Image_to_text/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

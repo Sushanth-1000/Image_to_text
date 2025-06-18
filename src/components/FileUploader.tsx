@@ -25,6 +25,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processImage = async (file: File) => {
+    if (isProcessing) return; // Prevent multiple processing
+    
     try {
       setIsProcessing(true);
       const worker = await createWorker();
@@ -41,6 +43,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
       onResult('Error processing image. Please try again.');
     } finally {
       setIsProcessing(false);
+      // Clear the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -49,16 +52,16 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files && files.length > 0) {
+    if (files && files.length > 0 && !isProcessing) {
       processImage(files[0]);
     }
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
+    if (acceptedFiles.length > 0 && !isProcessing) {
       processImage(acceptedFiles[0]);
     }
-  }, [onResult]);
+  }, [onResult, isProcessing]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -66,7 +69,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif']
     },
     multiple: false,
-    disabled: isProcessing
+    disabled: isProcessing,
+    noClick: isProcessing // Disable click events during processing
   });
 
   return (
@@ -90,7 +94,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
               component="label"
               onClick={e => {
                 e.stopPropagation();
-                fileInputRef.current?.click();
+                if (!isProcessing) {
+                  fileInputRef.current?.click();
+                }
               }}
               sx={{ mt: 2 }}
               disabled={isProcessing}
