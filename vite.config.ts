@@ -7,5 +7,5 @@ export default defineConfig({
     port: 3000,
     open: true
   },
-  base: '/Image_to_text/'
+  base: '/' // Root path for Netlify
 }) 
