@@ -23,11 +23,13 @@ interface FileUploaderProps {
 const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isProcessingRef = useRef(false);
 
   const processImage = async (file: File) => {
-    if (isProcessing) return; // Prevent multiple processing
+    if (isProcessingRef.current) return;
     
     try {
+      isProcessingRef.current = true;
       setIsProcessing(true);
       const worker = await createWorker();
       await worker.loadLanguage('eng');
@@ -42,8 +44,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
       console.error('Error processing image:', error);
       onResult('Error processing image. Please try again.');
     } finally {
+      isProcessingRef.current = false;
       setIsProcessing(false);
-      // Clear the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -52,16 +54,16 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files && files.length > 0 && !isProcessing) {
+    if (files && files.length > 0 && !isProcessingRef.current) {
       processImage(files[0]);
     }
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0 && !isProcessing) {
+    if (acceptedFiles.length > 0 && !isProcessingRef.current) {
       processImage(acceptedFiles[0]);
     }
-  }, [onResult, isProcessing]);
+  }, [onResult]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -70,11 +72,30 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
     },
     multiple: false,
     disabled: isProcessing,
-    noClick: isProcessing // Disable click events during processing
+    noClick: true // Disable click on dropzone
   });
 
   return (
     <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', p: 2 }}>
+      <Box sx={{ mb: 2 }}>
+        <Button
+          variant="contained"
+          component="label"
+          fullWidth
+          disabled={isProcessing}
+        >
+          Select Image
+          <input
+            ref={fileInputRef}
+            type="file"
+            hidden
+            accept="image/*"
+            onChange={handleFileSelect}
+            disabled={isProcessing}
+          />
+        </Button>
+      </Box>
+
       <DropzoneArea {...getRootProps()}>
         <input {...getInputProps()} />
         {isProcessing ? (
@@ -83,35 +104,11 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onResult }) => {
             <Typography>Processing image...</Typography>
           </Box>
         ) : (
-          <>
-            <Typography>
-              {isDragActive
-                ? 'Drop the image here'
-                : 'Drag and drop an image file here, or click to select'}
-            </Typography>
-            <Button
-              variant="contained"
-              component="label"
-              onClick={e => {
-                e.stopPropagation();
-                if (!isProcessing) {
-                  fileInputRef.current?.click();
-                }
-              }}
-              sx={{ mt: 2 }}
-              disabled={isProcessing}
-            >
-              Select Image
-              <input
-                ref={fileInputRef}
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleFileSelect}
-                disabled={isProcessing}
-              />
-            </Button>
-          </>
+          <Typography>
+            {isDragActive
+              ? 'Drop the image here'
+              : 'Or drag and drop an image file here'}
+          </Typography>
         )}
       </DropzoneArea>
     </Box>
